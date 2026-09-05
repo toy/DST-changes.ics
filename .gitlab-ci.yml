@@ -1,0 +1,13 @@
+default:
+  image: ruby:4
+
+build:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - bundle install
+    - bundle exec rake build
+  pages: true
+  artifacts:
+    paths:
+      - public
