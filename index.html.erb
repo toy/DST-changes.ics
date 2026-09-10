@@ -15,15 +15,61 @@
       display: inline-block;
       list-style: none;
     }
+    #timezones a {
+      margin: 0 -2px;
+      padding: 0 2px;
+      border-radius: 4px;
+    }
     .blank {
       color: gray;
     }
+    .hover:not(.same) {
+      color: orange;
+      transition: color 0.2s;
+    }
+    .same {
+      color: white;
+      background: rgb(from purple r g b / 50%);
+    }
+    .current {
+      color: white;
+      background: purple;
+    }
   </style>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('a[data-path]').forEach(a => {
-        a.href = new URL(a.dataset.path, window.location).href.replace(/\w+:/, 'webcal:')
+    const solstices = <%= JSON.dump(solstices.map(&:iso8601)) %>.map(s => new Date(s));
+    const localOffsets = solstices.map(d => -d.getTimezoneOffset()).join('/');
+
+    function currentTzName(){
+      try {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+      } catch (e) {
+        return undefined;
+      }
+    }
+
+    document.addEventListener('mouseover', e => {
+      const hovered = e.target.closest('a[data-utc-offsets]');
+      if (!hovered) return;
+
+      const hoveredOffsets = hovered.dataset.utcOffsets;
+      document.querySelectorAll('a[data-utc-offsets]').forEach(a => {
+        a.classList.toggle('hover', a.dataset.utcOffsets === hoveredOffsets)
       })
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tzName = currentTzName();
+
+      document.querySelectorAll('a[data-path]').forEach(a => {
+        if (a.innerText === tzName) {
+          a.classList.add('current');
+        }
+        if (a.dataset.utcOffsets === localOffsets) {
+          a.classList.add('same');
+        }
+        a.href = new URL(a.dataset.path, window.location).href.replace(/\w+:/, 'webcal:')
+      });
     })
   </script>
 </head>
@@ -38,10 +84,12 @@
     You may also want to check <a href="https://ivan-kuchin.gitlab.io/holidays.ics/">holidays.ics</a>
   </p>
 
-  <ul>
+  <ul id="timezones">
     <% all.each do |tz| %>
       <li>
-        <%= webcal_link tz %>
+        <a class="<%= 'blank' if tz.transitions.empty? %>" data-path="<%= h tz.name %>.ics" data-utc-offsets="<%= solstices.map{ |solstice| tz.period_for(solstice).observed_utc_offset / 60 }.join('/') %>">
+          <%= h tz.name %>
+        </a>
       </li>
     <% end %>
   </ul>

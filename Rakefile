@@ -1,26 +1,40 @@
+require 'date'
 require 'erb'
+require 'forwardable'
 require 'icalendar'
+require 'json'
 require 'pathname'
 require 'progress'
 require 'tzinfo'
 require 'tzinfo/data'
 
-Pathname.class_eval do
-  def write!(content)
-    dirname.mkpath
-    write(content)
+using(Module.new do
+  refine Date do
+    def next_solstice
+      case
+      when (month == 6 || month == 12) && day <= 21
+        self.class.new(year, month, 21)
+      when month == 12
+        self.class.new(year + 1, 6, 21)
+      when month < 6
+        self.class.new(year, 6, 21)
+      else
+        self.class.new(year, 12, 21)
+      end
+    end
   end
-end
+
+  refine Pathname do
+    def write!(content)
+      dirname.mkpath
+      write(content)
+    end
+  end
+end)
 
 module Helpers
   def h(text)
     CGI.escapeHTML(text)
-  end
-
-  def webcal_link(tz)
-    name = tz.name
-    css_class = tz.transitions.empty? ? 'blank' : nil
-    %Q{<a class="#{css_class}" data-path="#{h name}.ics">#{h name}</a>}
   end
 end
 
@@ -31,6 +45,10 @@ class TZ
     end
   end
 
+  extend Forwardable
+
+  def_delegators :@timezone, :name, :period_for
+
   attr_reader :id, :timezone, :transitions
 
   def initialize(id, dates)
@@ -38,8 +56,6 @@ class TZ
     @timezone = TZInfo::Timezone.get(id)
     @transitions = @timezone.transitions_up_to(dates.end, dates.begin)
   end
-
-  def name = @timezone.name
 end
 
 TZInfo::Timezone.default_dst = false
@@ -62,6 +78,8 @@ task :build do
 
   today = Date.today
   dates = today.prev_year.to_datetime..today.next_year(2).to_datetime
+  solstice = today.next_solstice
+  solstices = [solstice, solstice.next_month(6)].map{ |date| date.to_time.utc }
   all = TZ.all(dates)
 
   combined_calendar = init_calendar('All DST changes')
