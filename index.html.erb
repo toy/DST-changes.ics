@@ -7,6 +7,20 @@
   <style type="text/css">
     body {
       font: 15px "Myriad Pro", "Helvetica", Arial, sans-serif;
+      background: #eee;
+      color: #333;
+    }
+    a {
+      color: #111;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #333;
+        color: #aaa;
+      }
+      a {
+        color: #ccc;
+      }
     }
     ul {
       padding: 0;
@@ -28,12 +42,11 @@
       transition: color 0.2s;
     }
     .same {
-      color: white;
-      background: rgb(from purple r g b / 50%);
+      color: rgb(from #76f r g b / 80%);
     }
     .current {
-      color: white;
-      background: purple;
+      color: #85f;
+      font-weight: bold;
     }
   </style>
   <script>
