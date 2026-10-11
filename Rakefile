@@ -126,3 +126,5 @@ task :build do
     dst.join(basename).write!(src.join(basename).read)
   end
 end
+
+task default: :build
