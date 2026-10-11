@@ -1,3 +1,5 @@
+exec 'rake' if __FILE__ == $0
+
 require 'date'
 require 'erb'
 require 'forwardable'
