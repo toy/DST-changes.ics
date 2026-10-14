@@ -1,0 +1,28 @@
+name: check
+
+on:
+  push:
+  schedule:
+  - cron: '13 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+    - run: |
+        set -euo pipefail
+
+        url-test(){
+          local body
+          body=$(curl --fail --max-time 30 --retry 3 --retry-delay 10 --silent --show-error "$1")
+          for expected in "${@:2}"; do
+            fgrep -- "$expected" <<< "$body"
+          done
+        }
+
+        url-test https://ivan-kuchin.gitlab.io/DST-changes.ics/ Europe/Kyiv
+        url-test https://ivan-kuchin.gitlab.io/DST-changes.ics/Europe/Kyiv.ics DST changes for Europe/Kyiv 'clock backward by 1:00' 'clock forward by 1:00'
