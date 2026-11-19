@@ -25,4 +25,4 @@ jobs:
         }
 
         url-test https://ivan-kuchin.gitlab.io/DST-changes.ics/ Europe/Kyiv
-        url-test https://ivan-kuchin.gitlab.io/DST-changes.ics/Europe/Kyiv.ics DST changes for Europe/Kyiv 'clock backward by 1:00' 'clock forward by 1:00'
+        url-test https://ivan-kuchin.gitlab.io/DST-changes.ics/Europe/Kyiv.ics 'DST changes for Europe/Kyiv' 'clock backward by 1:00' 'clock forward by 1:00'
