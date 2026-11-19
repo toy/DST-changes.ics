@@ -18,7 +18,7 @@ jobs:
 
         url-test(){
           local body
-          body=$(curl --fail --max-time 30 --retry 3 --retry-delay 10 --silent --show-error "$1")
+          body=$(curl --fail --max-time 30 --retry 3 --retry-all-errors --retry-delay 10 --silent --show-error "$1")
           for expected in "${@:2}"; do
             fgrep -- "$expected" <<< "$body"
           done
